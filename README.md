@@ -6,7 +6,7 @@ You can use it to add a cookie consent function to your website or just show a m
 ## Installation
 Just `bower install --save modalcookie.js` or `npm install --save modalcookie.js`.
 
-## Prototype
+## API
 
 ### Constructor
 
@@ -16,10 +16,26 @@ ModalCookie([cookieName[, cookieExpireDay=365]])
 
 ### Methods
 
+```javascript
+ModalCookie.showDialog(message[, actionButtons])
+ModalCookie.showTopBar(message[, actionButtons])
+ModalCookie.showBottomBar(message[, actionButtons])
+ModalCookie.close()
+ModalCookie.preference.reset()
+ModalCookie.preference.save()
+ModalCookie.preference.setCookieExpireHours(cookieExpireHours)
+
 ```
-ModalCookie.showDialog(message[, dismissText[, linkText[, linkHref]]])
-ModalCookie.showBar(message[, dismissText[, linkText[, linkHref]]])
+
+### Events
+
 ```
+ModalCookie.on(event, callback)
+```
+
+Where:
+- event is `open` or `close`
+- callback is a function with the prototype `callback(element)`. See below for an example.
 
 ## Usage
 Include the `modalcookie.min.js` in your HTML and just call `ModalCookie().showDialog(message)`:
@@ -28,8 +44,8 @@ Include the `modalcookie.min.js` in your HTML and just call `ModalCookie().showD
 <script src="/path/to/modalcookie.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function(event) {
-    ModalCookie().showDialog("We use cookies to personalise content and ads, to provide social media features and to analyse our traffic.",
-        'OK', 'Know more', 'http://example.com/privacy-policy');
+    ModalCookie()
+        .showDialog("Welcome to our website!", 'Thanks');
 });
 </script>
 ```
@@ -37,17 +53,63 @@ document.addEventListener('DOMContentLoaded', function(event) {
 You can show sequentially multiple ModalCookie by adding the `cookieName` argument to the constructor:
 
 ```javascript
-ModalCookie('welcome').showDialog("Welcome to our website!", 'Thanks', 'About us', 'http://example.com/about');
-ModalCookie('newsletter').showDialog("Subscribe to our newsletter", 'Thanks', 'Subscribe now', 'http://example.com/newsletter');
+ModalCookie('welcome').showDialog("Welcome to our website!", 'Thanks');
+ModalCookie('social').showDialog("Dont forget to join us on Facebook!", 'OK');
 ```
 
 The second one will be displaying after the closing of the first one.
 
 ### ModalCookie Bar
-You can also use the `showBar(message)` function to display your message at the top page:
+You can also use `showTopBar(message)` and `showBottomBar(message)` to display your message at the top page:
 
 ```javascript
-ModalCookie('welcome').showBar("Welcome to our website!", 'Clone');
+ModalCookie('welcome').showTopBar("Welcome to our website!", 'Thanks');
+ModalCookie('social').showBottomBar("Dont forget to join us on Facebook!", 'OK');
+```
+
+### Multiple actions button
+
+```javascript
+var buttons = {
+    idBtnOk: 'OK',
+    idBtnCancel: 'Cancel'
+};
+
+ModalCookie().showDialog("Dont forget to join us on Facebook!", buttons);
+```
+
+### Events
+
+```javascript
+var message = 'Send us your feedback';
+var buttons = {
+    idBtnOk: 'OK',
+    idBtnCancel: 'Cancel'
+};
+
+var modal = ModalCookie();
+
+modal
+    .on('open', function(element) {
+        document.getElementById('idBtnCancel').addEventListener('click', function(e) {
+            modal.preference.save();
+            modal.close();
+            
+            window.location.href = 'http://example.com/feedback';
+            
+            e.preventDefault();
+        });
+        
+        document.getElementById('buttonId').addEventListener('click', function(e) {
+            modal.preference.setCookieExpireHours(1); // 1 hour
+            modal.preference.save();
+            modal.close();
+        });
+        
+        return false; // Disable the default events
+    })
+    .showDialog(message, buttons);
+});
 ```
 
 ## License
