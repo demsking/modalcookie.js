@@ -1,6 +1,6 @@
 {
   "name": "modalcookie.js",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A fork of cookiechoices.js to show modal on a page one time with cookie",
   "main": "gulpfile.js",
   "scripts": {
