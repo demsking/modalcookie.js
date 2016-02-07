@@ -1,7 +1,7 @@
 /*
- ModalCookie.js
- https://github.com/demsking/modalcookie.js
+ ModalCookie.js (https://github.com/demsking/modalcookie.js)
  Copyright 2016 Sébastien Demanou
+ Apache License, Version 2.0
  */
 
 (function(window) {
