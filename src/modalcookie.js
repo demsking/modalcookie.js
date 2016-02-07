@@ -13,61 +13,154 @@
   var document = window.document;
   var messageList = [];
 
-  var ModalCookie = function(cookieName, cookieExpireHours) {
-    var cookieName = cookieName ? (cookieName + 'NameModalCookie') : 'nameModalCookie';
-    var modalId = cookieName ? (cookieName + 'InfoModalCookie') : 'infoModalCookie';
+  var ModalCookie = function(id, cookieExpireHours) {
+    var defaultCookieName = 'nameModalCookie';
+    var cookieName = id ? (id + 'NameModalCookie') : defaultCookieName;
+    var modalId = id ? (id + 'InfoModalCookie') : 'infoModalCookie';
     var cookieExpireHour = cookieExpireHours ? cookieExpireHours : 365 * 24;
-    var dismissLinkId = cookieName ? (cookieName + 'DismissModalCookie') : 'dismissModalCookie';
+    var actionLinkId = id ? (id + 'DismissModalCookie') : 'dismissModalCookie';
+    
+    var modalElementClass = 'modal-cookie-overlay';
+    var contentDialogClass = 'modal-cookie-dialog'
+    var contentHeaderClass = 'modal-cookie-header'
+    var contentFooterClass = 'modal-cookie-footer'
+    var actionLinkClass = 'modal-cookie-action'
+    
+    var onOpen = function(element) {
+      var actionsElement = element.querySelectorAll('.' + actionLinkClass);
+      
+      for (var i in actionsElement) {
+        actionsElement[i].onclick = _actionLinkClick;
+      }
+    };
+    
+    var onClose = new Function();
 
-    function _createHeaderElement(cookieText, dismissText, linkText, linkHref) {
-      var butterBarStyles = 'position:fixed;width:100%;background-color:#eee;' +
-          'margin:0; left:0; top:0;padding:4px;z-index:1000;text-align:center;';
+    function _createActionElement(actionText, actionId, i, n) {
+      var actionLink = document.createElement('a');
+      
+      _setElementText(actionLink, actionText);
+      
+      actionLink.id = actionId || 'action' + (Math.floor(Math.random() * 6) + 1 ) + 'ModalCookie';
+      actionLink.href = '#';
+      actionLink.className = actionLinkClass;
+      actionLink.style.display = 'inline-block';
+      actionLink.style.marginLeft = '15px';
+      
+      if (i == (n - 1)) {
+        actionLink.style.marginRight = actionLink.style.marginLeft;
+      }
+      
+      return actionLink;
+    }
+    
+    function _createActionsElement(actions) {
+      var actionsElement = document.createElement('div');
+      
+      if (actions) {
+        switch (typeof actions) {
+          case 'string':
+            var _tmp_actions = {};
+            
+            _tmp_actions[actionLinkId + (Math.floor(Math.random() * 99) + 1 )] = actions;
+            
+            actions = _tmp_actions;
+            break;
+            
+          case 'object':
+            if (actions instanceof Array) {
+              var _tmp_actions = {};
+              
+              for (var id in actions) {
+                _tmp_actions[actionLinkId + id] = actions[id];
+              }
+              
+              actions = _tmp_actions;
+            }
+            break;
+        }
+        
+        var i = 0;
+        var n = 0;
+        
+        for (var id in actions) {
+          n++;
+        }
+        
+        actionsElement.style.display = 'block';
+        actionsElement.style.textAlign = 'center';
+        actionsElement.style.marginTop = '20px';
+        
+        for (var id in actions) {
+          actionsElement.appendChild(_createActionElement(actions[id], id, i++, n));
+        }
+      }
+      
+      return actionsElement;
+    }
+
+    function _createHeaderElement(modalText, modalActions) {
+      var butterBarStyles = 'position:fixed;width:100%;background-color:#fff;box-shadow:-1px 2px 13px 1px rgba(0,0,0,0.1);' +
+          'margin:0; left:0; top:0;padding:1em 2em;z-index:1000;text-align:center;';
 
       var modalElement = document.createElement('div');
+      var actionsElement = _createActionsElement(modalActions);
+      
       modalElement.id = modalId;
+      modalElement.className = contentHeaderClass;
       modalElement.style.cssText = butterBarStyles;
-      modalElement.appendChild(_createModalText(cookieText));
-
-      if (!!linkText && !!linkHref) {
-        modalElement.appendChild(_createInformationLink(linkText, linkHref));
-      }
-      modalElement.appendChild(_createDismissLink(dismissText));
+      modalElement.appendChild(_createModalText(modalText));
+      modalElement.appendChild(actionsElement);
+      
       return modalElement;
     }
 
-    function _createDialogElement(cookieText, dismissText, linkText, linkHref) {
+    function _createFooterElement(modalText, modalActions) {
+      var butterBarStyles = 'position:fixed;width:100%;background-color:#fff;box-shadow:-1px 2px 13px 1px rgba(0,0,0,0.1);' +
+          'margin:0; left:0; bottom:0;padding:1em 2em;;z-index:1000;text-align:center;';
+
+      var modalElement = document.createElement('div');
+      var actionsElement = _createActionsElement(modalActions);
+      
+      modalElement.id = modalId;
+      modalElement.className = contentFooterClass;
+      modalElement.style.cssText = butterBarStyles;
+      modalElement.appendChild(_createModalText(modalText));
+      modalElement.appendChild(actionsElement);
+      
+      return modalElement;
+    }
+
+    function _createDialogElement(modalText, modalActions) {
       var glassStyle = 'position:fixed;width:100%;height:100%;z-index:999;' +
-          'top:0;left:0;opacity:0.5;filter:alpha(opacity=50);' +
-          'background-color:#ccc;';
+          'top:0;left:0;opacity:0.9;filter:alpha(opacity=90);' +
+          'background-color:#C2CFE1;';
       var dialogStyle = 'z-index:1000;position:fixed;left:50%;top:50%';
-      var contentStyle = 'position:relative;left:-50%;margin-top:-25%;' +
-          'background-color:#fff;padding:20px;box-shadow:4px 4px 25px #888;';
+      var contentStyle = 'position:relative;left:-50%;margin-top:-25%;text-align:center;' +
+          'background-color:#fff;padding:2em 4em;box-shadow:-1px 2px 13px 1px rgba(0,0,0,0.07)';
 
       var modalElement = document.createElement('div');
       modalElement.id = modalId;
+      modalElement.className = modalElementClass;
 
       var glassPanel = document.createElement('div');
       glassPanel.style.cssText = glassStyle;
 
       var content = document.createElement('div');
       content.style.cssText = contentStyle;
+      content.className = contentDialogClass;
 
       var dialog = document.createElement('div');
       dialog.style.cssText = dialogStyle;
 
-      var dismissLink = _createDismissLink(dismissText);
-      dismissLink.style.display = 'block';
-      dismissLink.style.textAlign = 'right';
-      dismissLink.style.marginTop = '8px';
-
-      content.appendChild(_createModalText(cookieText));
-      if (!!linkText && !!linkHref) {
-        content.appendChild(_createInformationLink(linkText, linkHref));
-      }
-      content.appendChild(dismissLink);
+      content.appendChild(_createModalText(modalText));
+      content.appendChild(_createActionsElement(modalActions));
+      
       dialog.appendChild(content);
+      
       modalElement.appendChild(glassPanel);
       modalElement.appendChild(dialog);
+      
       return modalElement;
     }
 
@@ -75,38 +168,20 @@
       element.innerHTML = text;
     }
 
-    function _createModalText(cookieText) {
+    function _createModalText(modalText) {
       var consentText = document.createElement('div');
-      _setElementText(consentText, cookieText);
+      _setElementText(consentText, modalText);
       return consentText;
     }
 
-    function _createDismissLink(dismissText) {
-      var dismissLink = document.createElement('a');
-      _setElementText(dismissLink, dismissText);
-      dismissLink.id = dismissLinkId;
-      dismissLink.href = '#';
-      dismissLink.style.marginLeft = '24px';
-      return dismissLink;
-    }
-
-    function _createInformationLink(linkText, linkHref) {
-      var infoLink = document.createElement('a');
-      _setElementText(infoLink, linkText);
-      infoLink.href = linkHref;
-      infoLink.target = '_blank';
-      infoLink.style.marginLeft = '8px';
-      return infoLink;
-    }
-
-    function _dismissLinkClick() {
+    function _actionLinkClick() {
       _saveUserPreference();
       _removeModal();
       return false;
     }
 
-    function _show(cookieText, dismissText, linkText, linkHref, isDialog, queued) {
-        if (_shouldDisplayConsent()) {
+    function _show(modalText, modalActions, modalType, queued) {
+        if (_shouldDisplay()) {
           if (!queued) {
             var args = Array.prototype.slice.call(arguments);
             
@@ -119,31 +194,55 @@
             }
           }
           
-          //_removeModal();
-          var modalElement = (isDialog) 
-                             ? _createDialogElement(cookieText, dismissText, linkText, linkHref) 
-                             : _createHeaderElement(cookieText, dismissText, linkText, linkHref);
+          var modalElement;
+          
+          switch (modalType) {
+            case 'dialog':
+              modalElement = _createDialogElement(modalText, modalActions);
+              break;
               
+            case 'header':
+              modalElement = _createHeaderElement(modalText, modalActions);
+              break;
+              
+            case 'footer':
+              modalElement = _createFooterElement(modalText, modalActions);
+              break;
+          }
+          
           var fragment = document.createDocumentFragment();
           fragment.appendChild(modalElement);
-          document.body.appendChild(fragment.cloneNode(true));
-          document.getElementById(dismissLinkId).onclick = _dismissLinkClick;
+          document.body.appendChild(fragment);
+          
+          onOpen(modalElement);
         }
     }
 
-    function showBar(cookieText, dismissText, linkText, linkHref) {
-      _show(cookieText, dismissText, linkText, linkHref, false);
+    function showTopBar(modalText, modalActions) {
+      _show(modalText, modalActions, 'header');
+      
+      return exports;
     }
 
-    function showDialog(cookieText, dismissText, linkText, linkHref) {
-      _show(cookieText, dismissText, linkText, linkHref, true);
+    function showBottomBar(modalText, modalActions) {
+      _show(modalText, modalActions, 'footer');
+      
+      return exports;
+    }
+
+    function showDialog(modalText, modalActions) {
+      _show(modalText, modalActions, 'dialog');
+      
+      return exports;
     }
 
     function _removeModal() {
-      var cookieChoiceElement = document.getElementById(modalId);
-      if (cookieChoiceElement != null) {
-        cookieChoiceElement.parentNode.removeChild(cookieChoiceElement);
+      var modalElement = document.getElementById(modalId);
+      
+      if (modalElement != null) {
+        modalElement.parentNode.removeChild(modalElement);
       }
+      
       if (messageList.length) {
         messageList.shift();
         
@@ -151,6 +250,8 @@
           _show.apply(this, messageList[0]);
         }
       }
+      
+      onClose(modalElement);
     }
 
     function _saveUserPreference() {
@@ -160,14 +261,70 @@
       document.cookie = cookieName + '=y; expires=' + expiryDate.toGMTString();
     }
 
-    function _shouldDisplayConsent() {
+    function _deleteUserPreference() {
+      // Set the cookie expiry to cookieExpireHour hours after now.
+      var expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() - 1);
+      document.cookie = cookieName + '=y; expires=' + expiryDate.toGMTString();
+    }
+
+    function _shouldDisplay() {
       // Display the header only if the cookie has not been set.
       return !document.cookie.match(new RegExp(cookieName + '=([^;]+)'));
     }
 
-    var exports = {};
-    exports.showBar = showBar;
-    exports.showDialog = showDialog;
+    function _triggerEvent(trigger, fn) {
+      return (function(defaultFn) {
+        return function(element) {
+          if (fn(element) !== false) {
+            defaultFn(element);
+          }
+        };
+      })(trigger);
+    }
+    
+    // Exports
+    var exports = {
+      showTopBar: showTopBar,
+      showBottomBar: showBottomBar,
+      showDialog: showDialog,
+      close: function() {
+        _removeModal();
+        
+        return this;
+      },
+      on: function(triggerName, fn) {
+          switch (triggerName) {
+            case 'open':
+              onOpen = _triggerEvent(onOpen, fn);
+              break;
+              
+            case 'close':
+              onClose = _triggerEvent(onClose, fn);
+              break;
+          }
+          
+          return this;
+      },
+      preference: {
+        reset: function() {
+          _deleteUserPreference();
+          
+          return exports;
+        },
+        save: function() {
+          _saveUserPreference();
+          
+          return exports;
+        },
+        setCookieExpireHours: function(cookieExpireHours) {
+          cookieExpireHour = cookieExpireHours;
+          
+          return exports;
+        },
+      },
+    };
+    
     return exports;
   };
 
