@@ -91,7 +91,7 @@ var modal = ModalCookie();
 
 modal
     .on('open', function(element) {
-        document.getElementById('idBtnCancel').addEventListener('click', function(e) {
+        document.getElementById('idBtnOk').addEventListener('click', function(e) {
             modal.preference.save();
             modal.close();
             
@@ -100,7 +100,7 @@ modal
             e.preventDefault();
         });
         
-        document.getElementById('buttonId').addEventListener('click', function(e) {
+        document.getElementById('idBtnCancel').addEventListener('click', function(e) {
             modal.preference.setCookieExpireHours(1); // 1 hour
             modal.preference.save();
             modal.close();
