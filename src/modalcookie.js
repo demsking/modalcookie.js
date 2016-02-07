@@ -165,7 +165,7 @@
       // Set the cookie expiry to cookieExpireDay day after today.
       var expiryDate = new Date();
       expiryDate.setDate(expiryDate.getDate() + cookieExpireDay);
-      //document.cookie = cookieName + '=y; expires=' + expiryDate.toGMTString();
+      document.cookie = cookieName + '=y; expires=' + expiryDate.toGMTString();
     }
 
     function _shouldDisplayConsent() {
