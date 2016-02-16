@@ -265,7 +265,7 @@
       // Set the cookie expiry to cookieExpireHour hours after now.
       var expiryDate = new Date();
       expiryDate.setDate(expiryDate.getDate() - 1);
-      document.cookie = cookieName + '=y; expires=' + expiryDate.toGMTString();
+      document.cookie = cookieName + '=y; expires=' + expiryDate.toGMTString() + '; path=/';
     }
 
     function _shouldDisplay() {
